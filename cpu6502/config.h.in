@@ -1,0 +1,10 @@
+/*
+the configured options and settings for Sim6502
+*/
+#ifndef SIM6502_CONFIG_H
+#define SIM6502_CONFIG_H
+
+#define PROJECT_NAME "@PROJECT_NAME@"
+#define PROJECT_VERSION "@Sim6502_VERSION_MAJOR@.@Sim6502_VERSION_MINOR@.@Sim6502_VERSION_PATCH@"
+
+#endif // SIM6502_CONFIG_H
