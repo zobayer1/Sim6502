@@ -1,0 +1,62 @@
+# Editors/IDEs
+.vscode/
+.idea/
+*.code-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build directories (CMake, CLion, etc.)
+build/
+build-*/
+cmake-build-*/
+out/
+# Common build outputs at repo root
+/bin/
+/lib/
+
+# CMake generated files (usually inside build dirs, listed for safety if created at root)
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+Makefile
+install_manifest.txt
+compile_commands.json
+
+# Compiled objects and libraries
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dll
+*.dylib
+*.exe
+*.pdb
+*.pch
+
+# Coverage and testing artifacts
+*.gcno
+*.gcda
+*.gcov
+*.lcov
+coverage/
+Testing/
+install/
+
+# Logs and temp
+*.log
+*.tmp
+*~
+*.swp
+*.swo
+
+# CPack packages
+*.tar.gz
+*.zip
+*.7z
+*.deb
+*.rpm
+*.dmg

@@ -1,0 +1,9 @@
+# Config file for the cpu6502 package
+# Compute the installation prefix from the config file location
+get_filename_component(_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+set(cpu6502_INCLUDE_DIR "${_DIR}/@CMAKE_INSTALL_INCLUDEDIR@")
+set(cpu6502_LIB_DIR "${_DIR}/@CMAKE_INSTALL_LIBDIR@")
+
+# Provide the imported target
+include("${_DIR}/cpu6502Targets.cmake")
+
