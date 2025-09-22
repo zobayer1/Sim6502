@@ -7,8 +7,14 @@ An example program
 
 int main() {
     std::cout << CPU6502_PROJECT_NAME << " v" << CPU6502_VERSION << std::endl;
-    std::cout << "Hello 6502 World!" << std::endl;
-    auto cpu = CPU();
+    std::cout << "Starting 6502 MPU Simulation..." << std::endl;
+
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+
+    CPU cpu(memory);
     cpu.Reset();
+
     return 0;
 }

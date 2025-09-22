@@ -1,4 +1,5 @@
-add_library(cpu6502 cpu.cpp)
+add_library(cpu6502 cpu.cpp
+        mem.cpp)
 
 # Compile features propagate to consumers
 target_compile_features(cpu6502 PUBLIC cxx_std_17)

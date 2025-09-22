@@ -1,5 +1,5 @@
 if(BUILD_TESTING)
-    add_executable(cpu6502_tests cpu_test.cpp)
+    add_executable(cpu6502_tests cpu_test.cpp mem_test.cpp)
     target_link_libraries(cpu6502_tests PRIVATE cpu6502::cpu6502 GTest::gtest_main cpu6502_compiler_flags)
     include(GoogleTest)
     gtest_discover_tests(cpu6502_tests)
