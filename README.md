@@ -76,6 +76,54 @@ Optional: run clang-format manually if you prefer:
 clang-format -i include/cpu6502/*.hpp src/*.cpp tests/*.cpp examples/*.cpp
 ```
 
+Instructions
+------------
+Checklist of implemented and planned 6502 instructions / addressing modes. Checked items are currently implemented and tested.
+
+Load/Store
+- [x] LDA (Immediate) – Load accumulator with next byte; sets Z if result==0, N from bit 7.
+- [x] LDA (Zero Page) – Load A from zero-page address (1-byte address); sets Z, N.
+- [x] LDA (Absolute) – Load A from 16-bit absolute address; sets Z, N.
+- [ ] LDA (Zero Page,X)
+- [ ] LDA (Absolute,X)
+- [ ] LDA (Absolute,Y)
+- [ ] LDA (Indirect,X)
+- [ ] LDA (Indirect),Y
+- [ ] LDX / LDY (all addressing modes)
+- [ ] STA / STX / STY (store registers to memory)
+
+Arithmetic / Logic (planned)
+- [ ] ADC / SBC – Add/Subtract with Carry (sets C, V, Z, N)
+- [ ] AND / ORA / EOR – Bitwise operations (set Z, N)
+- [ ] CMP / CPX / CPY – Compare register with operand (set C, Z, N)
+
+Shifts / Rotates (planned)
+- [ ] ASL / LSR – Shift left/right (affect C, Z, N)
+- [ ] ROL / ROR – Rotate through carry (affect C, Z, N)
+
+Increments / Decrements (planned)
+- [ ] INC / DEC (memory)
+- [ ] INX / DEX / INY / DEY (registers)
+
+Branches & Jumps (planned)
+- [ ] JMP (Absolute / Indirect)
+- [ ] JSR / RTS – Subroutine call / return
+- [ ] Branches: BPL, BMI, BNE, BEQ, BVC, BVS, BCC, BCS (relative addressing)
+
+Stack & Status (planned)
+- [ ] PHA / PHP – Push A / Processor Status
+- [ ] PLA / PLP – Pull A / Processor Status
+- [ ] BRK / RTI – Force interrupt / Return from interrupt
+
+Other / Misc (planned)
+- [ ] NOP – No operation
+- [ ] Flag setting/clearing: CLC, SEC, CLI, SEI, CLV, CLD, SED
+
+Notes
+- Immediate mode uses the next byte as the operand (no extra memory read after fetch for address resolution).
+- Cycle counting currently accurate for implemented LDA modes; page-cross penalties not yet applied.
+- Additional instructions and addressing modes will be added incrementally with accompanying tests.
+
 Contributors
 ------------
 We welcome contributions of all sizes. Please read the guidelines in [CONTRIBUTORS.md](./CONTRIBUTORS.md) for workflow,

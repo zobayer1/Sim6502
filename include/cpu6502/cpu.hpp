@@ -18,6 +18,15 @@ class CPU {
     StatusFlags PS{};
     Memory &mem;
 
+    Byte FetchByte();
+    Word FetchWord();
+
+    void LDA(Byte operand);
+
+    Word AddrZeroPage();
+    Word AddrAbsolute();
+    Byte ReadByteAndTick(Word addr);
+
 public:
     Word PC;
     Word SP;
@@ -27,7 +36,9 @@ public:
     u32 cycles;
 
     explicit CPU(Memory &memory);
+
     void Reset();
+    void Execute(u32 exec_cycles);
 };
 
 #endif // CPU_HPP
