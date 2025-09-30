@@ -76,18 +76,15 @@ void CPU::Execute(u32 exec_cycles) {
         case 0x00:       // BRK (stub)
             cycles += 6; // total 7 including opcode fetch
             break;
-        case 0xA9: {          // LDA #imm
+        case 0xA9:            // LDA #imm
             LDA(FetchByte()); // already fetched operand; total 2 cycles
             break;
-        }
-        case 0xA5: {                              // LDA zp
+        case 0xA5:                                // LDA zp
             LDA(ReadByteAndTick(AddrZeroPage())); // total 3 cycles
             break;
-        }
-        case 0xAD: {                              // LDA abs
+        case 0xAD:                                // LDA abs
             LDA(ReadByteAndTick(AddrAbsolute())); // total 4 cycles
             break;
-        }
         case 0xEA:       // NOP
             cycles += 1; // total 2 cycles
             break;

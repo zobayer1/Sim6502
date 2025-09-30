@@ -1,6 +1,11 @@
 Microprocessor 6502 Simulation
 ==============================
 
+[![C++](https://img.shields.io/badge/C%2B%2B-00599C?style=flat&logo=c%2B%2B&logoColor=white)](https://img.shields.io/badge/C%2B%2B-00599C?style=flat&logo=c%2B%2B&logoColor=white)
+[![Linux](https://img.shields.io/badge/Linux-FCC624?style=flat&logo=linux&logoColor=black)](https://img.shields.io/badge/Linux-FCC624?style=flat&logo=linux&logoColor=black)
+[![CMake](https://github.com/zobayer1/Sim6502/actions/workflows/cmake-ubuntu.yml/badge.svg)](https://github.com/zobayer1/Sim6502/actions/workflows/cmake-ubuntu.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 An educational 6502 CPU simulator with a reusable C++ library (libcpu6502), a small example program (sim6502), and unit
 tests using GoogleTest. The library can be installed and used by other CMake projects via find_package(cpu6502).
 
