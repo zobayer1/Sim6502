@@ -26,6 +26,11 @@ class CPU {
     Word AddrZeroPage();
     Word AddrAbsolute();
     Byte ReadByteAndTick(Word addr);
+    Word AddrZeroPageX();
+    Word AddrAbsoluteX();
+    Word AddrIndexedIndirectX();
+    Word AddrAbsoluteY();
+    Word AddrIndirectIndexedY();
 
 public:
     Word PC;

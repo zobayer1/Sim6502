@@ -69,6 +69,48 @@ Word CPU::AddrZeroPage() { return FetchByte(); }
 
 Word CPU::AddrAbsolute() { return FetchWord(); }
 
+Word CPU::AddrZeroPageX() {
+    Byte base = FetchByte();
+    Word addr = static_cast<Byte>(base + X);
+    cycles += 1;
+    return addr;
+}
+
+Word CPU::AddrAbsoluteX() {
+    Word base = FetchWord();
+    Word addr = static_cast<Word>(base + X);
+    if ((base & 0xFF00) != (addr & 0xFF00))
+        cycles += 1;
+    return addr;
+}
+
+Word CPU::AddrIndexedIndirectX() {
+    Byte zp = static_cast<Byte>(FetchByte() + X);
+    cycles += 1;
+    Byte lo = ReadByteAndTick(zp);
+    Byte hi = ReadByteAndTick(static_cast<Byte>(zp + 1));
+    return static_cast<Word>((static_cast<Word>(hi) << 8) | lo);
+}
+
+Word CPU::AddrAbsoluteY() {
+    Word base = FetchWord();
+    Word addr = static_cast<Word>(base + Y);
+    if ((base & 0xFF00) != (addr & 0xFF00))
+        cycles += 1;
+    return addr;
+}
+
+Word CPU::AddrIndirectIndexedY() {
+    Byte zp = FetchByte();
+    Byte lo = ReadByteAndTick(zp);
+    Byte hi = ReadByteAndTick(static_cast<Byte>(zp + 1));
+    Word base = static_cast<Word>((static_cast<Word>(hi) << 8) | lo);
+    Word addr = static_cast<Word>(base + Y);
+    if ((base & 0xFF00) != (addr & 0xFF00))
+        cycles += 1;
+    return addr;
+}
+
 void CPU::Execute(u32 exec_cycles) {
     const u32 target_cycles = cycles + exec_cycles;
     while (cycles < target_cycles) {
@@ -84,6 +126,21 @@ void CPU::Execute(u32 exec_cycles) {
             break;
         case 0xAD:                                // LDA abs
             LDA(ReadByteAndTick(AddrAbsolute())); // total 4 cycles
+            break;
+        case 0xB5: // LDA zp,X
+            LDA(ReadByteAndTick(AddrZeroPageX()));
+            break;
+        case 0xBD: // LDA abs,X
+            LDA(ReadByteAndTick(AddrAbsoluteX()));
+            break;
+        case 0xA1: // LDA (ind,X)
+            LDA(ReadByteAndTick(AddrIndexedIndirectX()));
+            break;
+        case 0xB9: // LDA abs,Y
+            LDA(ReadByteAndTick(AddrAbsoluteY()));
+            break;
+        case 0xB1: // LDA (ind),Y
+            LDA(ReadByteAndTick(AddrIndirectIndexedY()));
             break;
         case 0xEA:       // NOP
             cycles += 1; // total 2 cycles

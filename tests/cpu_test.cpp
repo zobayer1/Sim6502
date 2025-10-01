@@ -108,3 +108,191 @@ TEST(CPUTest, Execute_LDAAbsolute_Consumes4Cycles) {
     EXPECT_EQ(cpu.PC, 0x8003);
     EXPECT_EQ(cpu.cycles, start_cycles + 4); // 10
 }
+
+TEST(CPUTest, Execute_LDAZeroPageX_Consumes4CyclesAndWraps) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+
+    memory.WriteByte(0x0010, 0x11);
+    memory.WriteByte(0x0005, 0x22);
+
+    memory.WriteByte(0x8000, 0xB5);
+    memory.WriteByte(0x8001, 0x20);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.X = 0xF0;
+
+    const u32 start_cycles = cpu.cycles;
+    cpu.Execute(4);
+
+    EXPECT_EQ(cpu.A, 0x11);
+    EXPECT_EQ(cpu.PC, 0x8002);
+    EXPECT_EQ(cpu.cycles, start_cycles + 4);
+}
+
+TEST(CPUTest, Execute_LDAAbsoluteX_NoPageCross_Consumes4Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+
+    memory.WriteByte(0x2005, 0x5A);
+
+    memory.WriteByte(0x8000, 0xBD);
+    memory.WriteByte(0x8001, 0x00);
+    memory.WriteByte(0x8002, 0x20);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.X = 0x05;
+
+    const u32 start_cycles = cpu.cycles;
+    cpu.Execute(4);
+
+    EXPECT_EQ(cpu.A, 0x5A);
+    EXPECT_EQ(cpu.PC, 0x8003);
+    EXPECT_EQ(cpu.cycles, start_cycles + 4);
+}
+
+TEST(CPUTest, Execute_LDAAbsoluteX_PageCross_Consumes5Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+
+    memory.WriteByte(0x210E, 0x99);
+
+    memory.WriteByte(0x8000, 0xBD);
+    memory.WriteByte(0x8001, 0xFE);
+    memory.WriteByte(0x8002, 0x20);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.X = 0x10;
+
+    const u32 start_cycles = cpu.cycles;
+    cpu.Execute(5);
+
+    EXPECT_EQ(cpu.A, 0x99);
+    EXPECT_EQ(cpu.PC, 0x8003);
+    EXPECT_EQ(cpu.cycles, start_cycles + 5);
+}
+
+TEST(CPUTest, Execute_LDAIndexedIndirectX_Consumes6CyclesAndWrapsPointer) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+
+    memory.WriteByte(0x00FF, 0x34);
+    memory.WriteByte(0x0000, 0x12);
+
+    memory.WriteByte(0x1234, 0xAB);
+
+    memory.WriteByte(0x8000, 0xA1);
+    memory.WriteByte(0x8001, 0xFF);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.X = 0x00;
+
+    const u32 start_cycles = cpu.cycles;
+    cpu.Execute(6);
+
+    EXPECT_EQ(cpu.A, 0xAB);
+    EXPECT_EQ(cpu.PC, 0x8002);
+    EXPECT_EQ(cpu.cycles, start_cycles + 6);
+}
+
+TEST(CPUTest, Execute_LDAAbsoluteY_NoPageCross_Consumes4Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+
+    memory.WriteByte(0x3006, 0x6C);
+
+    memory.WriteByte(0x8000, 0xB9);
+    memory.WriteByte(0x8001, 0x01);
+    memory.WriteByte(0x8002, 0x30);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.Y = 0x05;
+
+    const u32 start = cpu.cycles;
+    cpu.Execute(4);
+
+    EXPECT_EQ(cpu.A, 0x6C);
+    EXPECT_EQ(cpu.PC, 0x8003);
+    EXPECT_EQ(cpu.cycles, start + 4);
+}
+
+TEST(CPUTest, Execute_LDAAbsoluteY_PageCross_Consumes5Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+
+    memory.WriteByte(0x410E, 0x77);
+
+    memory.WriteByte(0x8000, 0xB9);
+    memory.WriteByte(0x8001, 0xFE);
+    memory.WriteByte(0x8002, 0x40);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.Y = 0x10;
+
+    const u32 start = cpu.cycles;
+    cpu.Execute(5);
+
+    EXPECT_EQ(cpu.A, 0x77);
+    EXPECT_EQ(cpu.PC, 0x8003);
+    EXPECT_EQ(cpu.cycles, start + 5);
+}
+
+TEST(CPUTest, Execute_LDAIndirectIndexedY_NoPageCross_Consumes5Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+
+    memory.WriteByte(0x0010, 0x00);
+    memory.WriteByte(0x0011, 0x20);
+    memory.WriteByte(0x2005, 0xA1);
+
+    memory.WriteByte(0x8000, 0xB1);
+    memory.WriteByte(0x8001, 0x10);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.Y = 0x05;
+
+    const u32 start = cpu.cycles;
+    cpu.Execute(5);
+
+    EXPECT_EQ(cpu.A, 0xA1);
+    EXPECT_EQ(cpu.PC, 0x8002);
+    EXPECT_EQ(cpu.cycles, start + 5);
+}
+
+TEST(CPUTest, Execute_LDAIndirectIndexedY_PageCross_Consumes6Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+
+    memory.WriteByte(0x00F0, 0xFE);
+    memory.WriteByte(0x00F1, 0x20);
+    memory.WriteByte(0x210E, 0xB2);
+
+    memory.WriteByte(0x8000, 0xB1);
+    memory.WriteByte(0x8001, 0xF0);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.Y = 0x10;
+
+    const u32 start = cpu.cycles;
+    cpu.Execute(6);
+
+    EXPECT_EQ(cpu.A, 0xB2);
+    EXPECT_EQ(cpu.PC, 0x8002);
+    EXPECT_EQ(cpu.cycles, start + 6);
+}

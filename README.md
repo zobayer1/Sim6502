@@ -26,7 +26,7 @@ Build & Clean
     ```sh
     cmake -S . -B build
     ```
-3. Build project
+3. Build all targets (library, tests, example)
     ```sh
     cmake --build build --config Debug --target all
     ```
@@ -69,6 +69,33 @@ Automatic update during configure:
   cmake -S . -B build -DGIT_SUBMODULE=OFF
   ```
 
+Troubleshooting
+---------------
+- JetBrains shows <cpu6502/config.hpp> in red
+  - Run configure/build so the generated header exists:
+    ```sh
+    cmake -S . -B build
+    cmake --build build --target cpu6502
+    ```
+  - Ensure the IDE’s CMake profile points to the same build directory (build/), then “Reload CMake Project.”
+  - Check that the header was generated at: build/src/include/cpu6502/config.hpp
+- Submodule clone fails in CI with SSH (Permission denied)
+  - Use HTTPS for googletest:
+    ```sh
+    git submodule set-url external/googletest https://github.com/google/googletest.git
+    git submodule sync
+    git submodule update --init --recursive
+    ```
+- Example path
+  - The example executable lives at: ./build/examples/sim6502
+- Stale build or missing headers
+  - Clean and reconfigure:
+    ```sh
+    rm -rf build
+    cmake -S . -B build
+    cmake --build build --target all
+    ```
+
 Code Style
 ----------
 Use the CMake targets to format only files in `include/`, `src/`, `tests/`, and `examples/`:
@@ -89,11 +116,11 @@ Load/Store
 - [x] LDA (Immediate) – Load accumulator with next byte; sets Z if result==0, N from bit 7.
 - [x] LDA (Zero Page) – Load A from zero-page address (1-byte address); sets Z, N.
 - [x] LDA (Absolute) – Load A from 16-bit absolute address; sets Z, N.
-- [ ] LDA (Zero Page,X)
-- [ ] LDA (Absolute,X)
-- [ ] LDA (Absolute,Y)
-- [ ] LDA (Indirect,X)
-- [ ] LDA (Indirect),Y
+- [x] LDA (Zero Page,X) – Load A from (ZP + X) & 0xFF; sets Z, N. Fixed 4 cycles.
+- [x] LDA (Absolute,X) – Load A from (abs + X); sets Z, N. +1 cycle on page cross.
+- [x] LDA (Absolute,Y) – Load A from (abs + Y); sets Z, N. +1 cycle on page cross.
+- [x] LDA (Indirect,X) – Load A from address at ZP pointer (operand + X) & 0xFF; sets Z, N. Fixed 6 cycles (ZP wraps).
+- [x] LDA (Indirect),Y – Load A from address at ZP pointer then + Y; sets Z, N. +1 cycle on page cross.
 - [ ] LDX / LDY (all addressing modes)
 - [ ] STA / STX / STY (store registers to memory)
 
@@ -125,8 +152,7 @@ Other / Misc (planned)
 - [ ] Flag setting/clearing: CLC, SEC, CLI, SEI, CLV, CLD, SED
 
 Notes
-- Immediate mode uses the next byte as the operand (no extra memory read after fetch for address resolution).
-- Cycle counting currently accurate for implemented LDA modes; page-cross penalties not yet applied.
+- Cycle counting is accurate for implemented LDA modes, including page-cross penalties for Absolute,X / Absolute,Y and (Indirect),Y. Zero Page,X and (Indirect,X) use their fixed cycle counts.
 - Additional instructions and addressing modes will be added incrementally with accompanying tests.
 
 Contributors
