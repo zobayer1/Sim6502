@@ -296,3 +296,243 @@ TEST(CPUTest, Execute_LDAIndirectIndexedY_PageCross_Consumes6Cycles) {
     EXPECT_EQ(cpu.PC, 0x8002);
     EXPECT_EQ(cpu.cycles, start + 6);
 }
+
+TEST(CPUTest, Execute_LDXImmediate_Consumes2Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x8000, 0xA2);
+    memory.WriteByte(0x8001, 0x7F);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    const u32 start = cpu.cycles;
+
+    cpu.Execute(2);
+
+    EXPECT_EQ(cpu.X, 0x7F);
+    EXPECT_EQ(cpu.PC, 0x8002);
+    EXPECT_EQ(cpu.cycles, start + 2);
+}
+
+TEST(CPUTest, Execute_LDXZeroPage_Consumes3Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x0042, 0x99);
+    memory.WriteByte(0x8000, 0xA6);
+    memory.WriteByte(0x8001, 0x42);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    const u32 start = cpu.cycles;
+
+    cpu.Execute(3);
+
+    EXPECT_EQ(cpu.X, 0x99);
+    EXPECT_EQ(cpu.PC, 0x8002);
+    EXPECT_EQ(cpu.cycles, start + 3);
+}
+
+TEST(CPUTest, Execute_LDXAbsolute_Consumes4Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x1234, 0x55);
+    memory.WriteByte(0x8000, 0xAE);
+    memory.WriteByte(0x8001, 0x34);
+    memory.WriteByte(0x8002, 0x12);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    const u32 start = cpu.cycles;
+
+    cpu.Execute(4);
+
+    EXPECT_EQ(cpu.X, 0x55);
+    EXPECT_EQ(cpu.PC, 0x8003);
+    EXPECT_EQ(cpu.cycles, start + 4);
+}
+
+TEST(CPUTest, Execute_LDXZeroPageY_Consumes4CyclesAndWraps) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x0010, 0x11);
+    memory.WriteByte(0x0005, 0x22);
+    memory.WriteByte(0x8000, 0xB6);
+    memory.WriteByte(0x8001, 0x20);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.Y = 0xF0;
+
+    const u32 start = cpu.cycles;
+    cpu.Execute(4);
+
+    EXPECT_EQ(cpu.X, 0x11);
+    EXPECT_EQ(cpu.PC, 0x8002);
+    EXPECT_EQ(cpu.cycles, start + 4);
+}
+
+TEST(CPUTest, Execute_LDXAbsoluteY_NoPageCross_Consumes4Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x2005, 0x5A);
+    memory.WriteByte(0x8000, 0xBE);
+    memory.WriteByte(0x8001, 0x00);
+    memory.WriteByte(0x8002, 0x20);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.Y = 0x05;
+
+    const u32 start = cpu.cycles;
+    cpu.Execute(4);
+
+    EXPECT_EQ(cpu.X, 0x5A);
+    EXPECT_EQ(cpu.PC, 0x8003);
+    EXPECT_EQ(cpu.cycles, start + 4);
+}
+
+TEST(CPUTest, Execute_LDXAbsoluteY_PageCross_Consumes5Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x210E, 0x99);
+    memory.WriteByte(0x8000, 0xBE);
+    memory.WriteByte(0x8001, 0xFE);
+    memory.WriteByte(0x8002, 0x20);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.Y = 0x10;
+
+    const u32 start = cpu.cycles;
+    cpu.Execute(5);
+
+    EXPECT_EQ(cpu.X, 0x99);
+    EXPECT_EQ(cpu.PC, 0x8003);
+    EXPECT_EQ(cpu.cycles, start + 5);
+}
+
+TEST(CPUTest, Execute_LDYImmediate_Consumes2Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x8000, 0xA0);
+    memory.WriteByte(0x8001, 0x80);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    const u32 start = cpu.cycles;
+
+    cpu.Execute(2);
+
+    EXPECT_EQ(cpu.Y, 0x80);
+    EXPECT_EQ(cpu.PC, 0x8002);
+    EXPECT_EQ(cpu.cycles, start + 2);
+}
+
+TEST(CPUTest, Execute_LDYZeroPage_Consumes3Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x0042, 0x44);
+    memory.WriteByte(0x8000, 0xA4);
+    memory.WriteByte(0x8001, 0x42);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    const u32 start = cpu.cycles;
+
+    cpu.Execute(3);
+
+    EXPECT_EQ(cpu.Y, 0x44);
+    EXPECT_EQ(cpu.PC, 0x8002);
+    EXPECT_EQ(cpu.cycles, start + 3);
+}
+
+TEST(CPUTest, Execute_LDYAbsolute_Consumes4Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x1234, 0x10);
+    memory.WriteByte(0x8000, 0xAC);
+    memory.WriteByte(0x8001, 0x34);
+    memory.WriteByte(0x8002, 0x12);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    const u32 start = cpu.cycles;
+
+    cpu.Execute(4);
+
+    EXPECT_EQ(cpu.Y, 0x10);
+    EXPECT_EQ(cpu.PC, 0x8003);
+    EXPECT_EQ(cpu.cycles, start + 4);
+}
+
+TEST(CPUTest, Execute_LDYZeroPageX_Consumes4CyclesAndWraps) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x0010, 0xAA);
+    memory.WriteByte(0x0005, 0xBB);
+    memory.WriteByte(0x8000, 0xB4);
+    memory.WriteByte(0x8001, 0x20);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.X = 0xF0;
+
+    const u32 start = cpu.cycles;
+    cpu.Execute(4);
+
+    EXPECT_EQ(cpu.Y, 0xAA);
+    EXPECT_EQ(cpu.PC, 0x8002);
+    EXPECT_EQ(cpu.cycles, start + 4);
+}
+
+TEST(CPUTest, Execute_LDYAbsoluteX_NoPageCross_Consumes4Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x2005, 0xCC);
+    memory.WriteByte(0x8000, 0xBC);
+    memory.WriteByte(0x8001, 0x00);
+    memory.WriteByte(0x8002, 0x20);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.X = 0x05;
+
+    const u32 start = cpu.cycles;
+    cpu.Execute(4);
+
+    EXPECT_EQ(cpu.Y, 0xCC);
+    EXPECT_EQ(cpu.PC, 0x8003);
+    EXPECT_EQ(cpu.cycles, start + 4);
+}
+
+TEST(CPUTest, Execute_LDYAbsoluteX_PageCross_Consumes5Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x210E, 0xDD);
+    memory.WriteByte(0x8000, 0xBC);
+    memory.WriteByte(0x8001, 0xFE);
+    memory.WriteByte(0x8002, 0x20);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.X = 0x10;
+
+    const u32 start = cpu.cycles;
+    cpu.Execute(5);
+
+    EXPECT_EQ(cpu.Y, 0xDD);
+    EXPECT_EQ(cpu.PC, 0x8003);
+    EXPECT_EQ(cpu.cycles, start + 5);
+}

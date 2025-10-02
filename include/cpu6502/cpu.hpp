@@ -22,11 +22,14 @@ class CPU {
     Word FetchWord();
 
     void LDA(Byte operand);
+    void LDX(Byte operand);
+    void LDY(Byte operand);
 
     Word AddrZeroPage();
     Word AddrAbsolute();
     Byte ReadByteAndTick(Word addr);
     Word AddrZeroPageX();
+    Word AddrZeroPageY();
     Word AddrAbsoluteX();
     Word AddrIndexedIndirectX();
     Word AddrAbsoluteY();

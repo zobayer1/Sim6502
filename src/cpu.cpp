@@ -59,6 +59,18 @@ void CPU::LDA(Byte operand) {
     PS.N = (A & 0x80) != 0;
 }
 
+void CPU::LDX(Byte operand) {
+    X = operand;
+    PS.Z = (X == 0);
+    PS.N = (X & 0x80) != 0;
+}
+
+void CPU::LDY(Byte operand) {
+    Y = operand;
+    PS.Z = (Y == 0);
+    PS.N = (Y & 0x80) != 0;
+}
+
 Byte CPU::ReadByteAndTick(Word addr) {
     const Byte value = mem.ReadByte(addr);
     cycles += 1;
@@ -70,42 +82,49 @@ Word CPU::AddrZeroPage() { return FetchByte(); }
 Word CPU::AddrAbsolute() { return FetchWord(); }
 
 Word CPU::AddrZeroPageX() {
-    Byte base = FetchByte();
-    Word addr = static_cast<Byte>(base + X);
+    const Byte base = FetchByte();
+    const Word addr = static_cast<Byte>(base + X);
+    cycles += 1;
+    return addr;
+}
+
+Word CPU::AddrZeroPageY() {
+    const Byte base = FetchByte();
+    const Word addr = static_cast<Byte>(base + Y);
     cycles += 1;
     return addr;
 }
 
 Word CPU::AddrAbsoluteX() {
-    Word base = FetchWord();
-    Word addr = static_cast<Word>(base + X);
+    const Word base = FetchWord();
+    const Word addr = static_cast<Word>(base + X);
     if ((base & 0xFF00) != (addr & 0xFF00))
         cycles += 1;
     return addr;
 }
 
 Word CPU::AddrIndexedIndirectX() {
-    Byte zp = static_cast<Byte>(FetchByte() + X);
+    const Byte zp = static_cast<Byte>(FetchByte() + X);
     cycles += 1;
-    Byte lo = ReadByteAndTick(zp);
-    Byte hi = ReadByteAndTick(static_cast<Byte>(zp + 1));
+    const Byte lo = ReadByteAndTick(zp);
+    const Byte hi = ReadByteAndTick(static_cast<Byte>(zp + 1));
     return static_cast<Word>((static_cast<Word>(hi) << 8) | lo);
 }
 
 Word CPU::AddrAbsoluteY() {
-    Word base = FetchWord();
-    Word addr = static_cast<Word>(base + Y);
+    const Word base = FetchWord();
+    const Word addr = static_cast<Word>(base + Y);
     if ((base & 0xFF00) != (addr & 0xFF00))
         cycles += 1;
     return addr;
 }
 
 Word CPU::AddrIndirectIndexedY() {
-    Byte zp = FetchByte();
-    Byte lo = ReadByteAndTick(zp);
-    Byte hi = ReadByteAndTick(static_cast<Byte>(zp + 1));
-    Word base = static_cast<Word>((static_cast<Word>(hi) << 8) | lo);
-    Word addr = static_cast<Word>(base + Y);
+    const Byte zp = FetchByte();
+    const Byte lo = ReadByteAndTick(zp);
+    const Byte hi = ReadByteAndTick(static_cast<Byte>(zp + 1));
+    const Word base = static_cast<Word>((static_cast<Word>(hi) << 8) | lo);
+    const Word addr = static_cast<Word>(base + Y);
     if ((base & 0xFF00) != (addr & 0xFF00))
         cycles += 1;
     return addr;
@@ -119,13 +138,13 @@ void CPU::Execute(u32 exec_cycles) {
             cycles += 6; // total 7 including opcode fetch
             break;
         case 0xA9:            // LDA #imm
-            LDA(FetchByte()); // already fetched operand; total 2 cycles
+            LDA(FetchByte()); // total 2 cycles
             break;
-        case 0xA5:                                // LDA zp
-            LDA(ReadByteAndTick(AddrZeroPage())); // total 3 cycles
+        case 0xA5: // LDA zp
+            LDA(ReadByteAndTick(AddrZeroPage()));
             break;
-        case 0xAD:                                // LDA abs
-            LDA(ReadByteAndTick(AddrAbsolute())); // total 4 cycles
+        case 0xAD: // LDA abs
+            LDA(ReadByteAndTick(AddrAbsolute()));
             break;
         case 0xB5: // LDA zp,X
             LDA(ReadByteAndTick(AddrZeroPageX()));
@@ -141,6 +160,36 @@ void CPU::Execute(u32 exec_cycles) {
             break;
         case 0xB1: // LDA (ind),Y
             LDA(ReadByteAndTick(AddrIndirectIndexedY()));
+            break;
+        case 0xA2:            // LDX #imm
+            LDX(FetchByte()); // total 2 cycles
+            break;
+        case 0xA6: // LDX zp
+            LDX(ReadByteAndTick(AddrZeroPage()));
+            break;
+        case 0xAE: // LDX abs
+            LDX(ReadByteAndTick(AddrAbsolute()));
+            break;
+        case 0xB6: // LDX zp,Y
+            LDX(ReadByteAndTick(AddrZeroPageY()));
+            break;
+        case 0xBE: // LDX abs,Y
+            LDX(ReadByteAndTick(AddrAbsoluteY()));
+            break;
+        case 0xA0:            // LDY #imm
+            LDY(FetchByte()); // total 2 cycles
+            break;
+        case 0xA4: // LDY zp
+            LDY(ReadByteAndTick(AddrZeroPage()));
+            break;
+        case 0xAC: // LDY abs
+            LDY(ReadByteAndTick(AddrAbsolute()));
+            break;
+        case 0xB4: // LDY zp,X
+            LDY(ReadByteAndTick(AddrZeroPageX()));
+            break;
+        case 0xBC: // LDY abs,X
+            LDY(ReadByteAndTick(AddrAbsoluteX()));
             break;
         case 0xEA:       // NOP
             cycles += 1; // total 2 cycles
