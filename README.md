@@ -47,8 +47,8 @@ Run all tests:
 ctest --test-dir build --output-on-failure
 ```
 
-**NOTE**: We intentionally avoid testing `WriteWord` at address `0xFFFF` because the current implementation would index
-past the end of memory. If page/space wrap is desired later, the implementation and tests should be updated accordingly.
+**NOTE**: `ReadWord` and `WriteWord` currently wrap from address `0xFFFF` to `0x0000` because addresses are handled as
+16-bit values. This behavior is now covered by `tests/mem_test.cpp`.
 
 Build and Run Example
 ---------------------
@@ -108,61 +108,12 @@ Optional: run clang-format manually if you prefer:
 clang-format -i include/cpu6502/*.hpp src/*.cpp tests/*.cpp examples/*.cpp
 ```
 
-Instructions
-------------
-Checklist of implemented and planned 6502 instructions / addressing modes. Checked items are currently implemented and tested.
+Instruction Status
+------------------
+Instruction status is tracked in dedicated docs instead of being maintained inline in this README:
 
-Load/Store
-- [x] LDA (Immediate) – Load accumulator with next byte; sets Z if result==0, N from bit 7.
-- [x] LDA (Zero Page) – Load A from zero-page address (1-byte address); sets Z, N.
-- [x] LDA (Absolute) – Load A from 16-bit absolute address; sets Z, N.
-- [x] LDA (Zero Page,X) – Load A from (ZP + X) & 0xFF; sets Z, N. Fixed 4 cycles.
-- [x] LDA (Absolute,X) – Load A from (abs + X); sets Z, N. +1 cycle on page cross.
-- [x] LDA (Absolute,Y) – Load A from (abs + Y); sets Z, N. +1 cycle on page cross.
-- [x] LDA (Indirect,X) – Load A from address at ZP pointer (operand + X) & 0xFF; sets Z, N. Fixed 6 cycles (ZP wraps).
-- [x] LDA (Indirect),Y – Load A from address at ZP pointer then + Y; sets Z, N. +1 cycle on page cross.
-- [x] LDX (Immediate) – Load X with next byte; sets Z if result==0, N from bit 7.
-- [x] LDX (Zero Page) – Load X from zero-page address; sets Z, N.
-- [x] LDX (Absolute) – Load X from absolute address; sets Z, N.
-- [x] LDX (Zero Page,Y) – Load X from (ZP + Y) & 0xFF; sets Z, N. Fixed 4 cycles.
-- [x] LDX (Absolute,Y) – Load X from (abs + Y); sets Z, N. +1 cycle on page cross.
-- [x] LDY (Immediate) – Load Y with next byte; sets Z if result==0, N from bit 7.
-- [x] LDY (Zero Page) – Load Y from zero-page address; sets Z, N.
-- [x] LDY (Absolute) – Load Y from absolute address; sets Z, N.
-- [x] LDY (Zero Page,X) – Load Y from (ZP + X) & 0xFF; sets Z, N. Fixed 4 cycles.
-- [x] LDY (Absolute,X) – Load Y from (abs + X); sets Z, N. +1 cycle on page cross.
-- [ ] STA / STX / STY (store registers to memory)
-
-Arithmetic / Logic (planned)
-- [ ] ADC / SBC – Add/Subtract with Carry (sets C, V, Z, N)
-- [ ] AND / ORA / EOR – Bitwise operations (set Z, N)
-- [ ] CMP / CPX / CPY – Compare register with operand (set C, Z, N)
-
-Shifts / Rotates (planned)
-- [ ] ASL / LSR – Shift left/right (affect C, Z, N)
-- [ ] ROL / ROR – Rotate through carry (affect C, Z, N)
-
-Increments / Decrements (planned)
-- [ ] INC / DEC (memory)
-- [ ] INX / DEX / INY / DEY (registers)
-
-Branches & Jumps (planned)
-- [ ] JMP (Absolute / Indirect)
-- [ ] JSR / RTS – Subroutine call / return
-- [ ] Branches: BPL, BMI, BNE, BEQ, BVC, BVS, BCC, BCS (relative addressing)
-
-Stack & Status (planned)
-- [ ] PHA / PHP – Push A / Processor Status
-- [ ] PLA / PLP – Pull A / Processor Status
-- [ ] BRK / RTI – Force interrupt / Return from interrupt
-
-Other / Misc (planned)
-- [ ] NOP – No operation
-- [ ] Flag setting/clearing: CLC, SEC, CLI, SEI, CLV, CLD, SED
-
-Notes
-- Cycle counting is accurate for implemented LDA/LDX/LDY modes, including page-cross penalties for Absolute,X / Absolute,Y and (Indirect),Y. Zero Page,X and (Indirect,X) use their fixed cycle counts.
-- Additional instructions and addressing modes will be added incrementally with accompanying tests.
+- Implemented and tested instructions: [`docs/cpu-instructions.md`](./docs/cpu-instructions.md)
+- Current backlog / TODO: [`docs/todo.md`](./docs/todo.md)
 
 Contributors
 ------------
