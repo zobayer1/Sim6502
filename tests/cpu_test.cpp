@@ -572,3 +572,279 @@ TEST(CPUTest, Execute_LDYAbsoluteX_PageCross_Consumes5Cycles) {
     EXPECT_EQ(cpu.PC, 0x8003);
     EXPECT_EQ(cpu.cycles, start + 5);
 }
+
+TEST(CPUTest, Execute_STAZeroPage_Consumes3Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x8000, 0x85);
+    memory.WriteByte(0x8001, 0x42);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.A = 0x5A;
+
+    const u32 start = cpu.cycles;
+    cpu.Execute(3);
+
+    EXPECT_EQ(memory.ReadByte(0x0042), 0x5A);
+    EXPECT_EQ(cpu.A, 0x5A);
+    EXPECT_EQ(cpu.PC, 0x8002);
+    EXPECT_EQ(cpu.cycles, start + 3);
+}
+
+TEST(CPUTest, Execute_STAAbsolute_Consumes4Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x8000, 0x8D);
+    memory.WriteByte(0x8001, 0x34);
+    memory.WriteByte(0x8002, 0x12);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.A = 0x6B;
+
+    const u32 start = cpu.cycles;
+    cpu.Execute(4);
+
+    EXPECT_EQ(memory.ReadByte(0x1234), 0x6B);
+    EXPECT_EQ(cpu.A, 0x6B);
+    EXPECT_EQ(cpu.PC, 0x8003);
+    EXPECT_EQ(cpu.cycles, start + 4);
+}
+
+TEST(CPUTest, Execute_STAZeroPageX_Consumes4CyclesAndWraps) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x8000, 0x95);
+    memory.WriteByte(0x8001, 0x20);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.A = 0x7C;
+    cpu.X = 0xF0;
+
+    const u32 start = cpu.cycles;
+    cpu.Execute(4);
+
+    EXPECT_EQ(memory.ReadByte(0x0010), 0x7C);
+    EXPECT_EQ(cpu.A, 0x7C);
+    EXPECT_EQ(cpu.PC, 0x8002);
+    EXPECT_EQ(cpu.cycles, start + 4);
+}
+
+TEST(CPUTest, Execute_STAAbsoluteX_PageCrossStillConsumes5Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x8000, 0x9D);
+    memory.WriteByte(0x8001, 0xFE);
+    memory.WriteByte(0x8002, 0x20);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.A = 0x91;
+    cpu.X = 0x10;
+
+    const u32 start = cpu.cycles;
+    cpu.Execute(5);
+
+    EXPECT_EQ(memory.ReadByte(0x210E), 0x91);
+    EXPECT_EQ(cpu.A, 0x91);
+    EXPECT_EQ(cpu.PC, 0x8003);
+    EXPECT_EQ(cpu.cycles, start + 5);
+}
+
+TEST(CPUTest, Execute_STAAbsoluteY_PageCrossStillConsumes5Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x8000, 0x99);
+    memory.WriteByte(0x8001, 0xFE);
+    memory.WriteByte(0x8002, 0x20);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.A = 0x82;
+    cpu.Y = 0x10;
+
+    const u32 start = cpu.cycles;
+    cpu.Execute(5);
+
+    EXPECT_EQ(memory.ReadByte(0x210E), 0x82);
+    EXPECT_EQ(cpu.A, 0x82);
+    EXPECT_EQ(cpu.PC, 0x8003);
+    EXPECT_EQ(cpu.cycles, start + 5);
+}
+
+TEST(CPUTest, Execute_STAIndexedIndirectX_Consumes6CyclesAndWrapsPointer) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x00FF, 0x34);
+    memory.WriteByte(0x0000, 0x12);
+    memory.WriteByte(0x8000, 0x81);
+    memory.WriteByte(0x8001, 0xFF);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.A = 0xAB;
+    cpu.X = 0x00;
+
+    const u32 start = cpu.cycles;
+    cpu.Execute(6);
+
+    EXPECT_EQ(memory.ReadByte(0x1234), 0xAB);
+    EXPECT_EQ(cpu.A, 0xAB);
+    EXPECT_EQ(cpu.PC, 0x8002);
+    EXPECT_EQ(cpu.cycles, start + 6);
+}
+
+TEST(CPUTest, Execute_STAIndirectIndexedY_PageCrossStillConsumes6Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x0010, 0xFE);
+    memory.WriteByte(0x0011, 0x20);
+    memory.WriteByte(0x8000, 0x91);
+    memory.WriteByte(0x8001, 0x10);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.A = 0xB2;
+    cpu.Y = 0x10;
+
+    const u32 start = cpu.cycles;
+    cpu.Execute(6);
+
+    EXPECT_EQ(memory.ReadByte(0x210E), 0xB2);
+    EXPECT_EQ(cpu.A, 0xB2);
+    EXPECT_EQ(cpu.PC, 0x8002);
+    EXPECT_EQ(cpu.cycles, start + 6);
+}
+
+TEST(CPUTest, Execute_STXZeroPage_Consumes3Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x8000, 0x86);
+    memory.WriteByte(0x8001, 0x24);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.X = 0x3C;
+
+    const u32 start = cpu.cycles;
+    cpu.Execute(3);
+
+    EXPECT_EQ(memory.ReadByte(0x0024), 0x3C);
+    EXPECT_EQ(cpu.X, 0x3C);
+    EXPECT_EQ(cpu.PC, 0x8002);
+    EXPECT_EQ(cpu.cycles, start + 3);
+}
+
+TEST(CPUTest, Execute_STXAbsolute_Consumes4Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x8000, 0x8E);
+    memory.WriteByte(0x8001, 0x78);
+    memory.WriteByte(0x8002, 0x56);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.X = 0x44;
+
+    const u32 start = cpu.cycles;
+    cpu.Execute(4);
+
+    EXPECT_EQ(memory.ReadByte(0x5678), 0x44);
+    EXPECT_EQ(cpu.X, 0x44);
+    EXPECT_EQ(cpu.PC, 0x8003);
+    EXPECT_EQ(cpu.cycles, start + 4);
+}
+
+TEST(CPUTest, Execute_STXZeroPageY_Consumes4CyclesAndWraps) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x8000, 0x96);
+    memory.WriteByte(0x8001, 0x20);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.X = 0x9E;
+    cpu.Y = 0xF0;
+
+    const u32 start = cpu.cycles;
+    cpu.Execute(4);
+
+    EXPECT_EQ(memory.ReadByte(0x0010), 0x9E);
+    EXPECT_EQ(cpu.X, 0x9E);
+    EXPECT_EQ(cpu.PC, 0x8002);
+    EXPECT_EQ(cpu.cycles, start + 4);
+}
+
+TEST(CPUTest, Execute_STYZeroPage_Consumes3Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x8000, 0x84);
+    memory.WriteByte(0x8001, 0x31);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.Y = 0x5D;
+
+    const u32 start = cpu.cycles;
+    cpu.Execute(3);
+
+    EXPECT_EQ(memory.ReadByte(0x0031), 0x5D);
+    EXPECT_EQ(cpu.Y, 0x5D);
+    EXPECT_EQ(cpu.PC, 0x8002);
+    EXPECT_EQ(cpu.cycles, start + 3);
+}
+
+TEST(CPUTest, Execute_STYAbsolute_Consumes4Cycles) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x8000, 0x8C);
+    memory.WriteByte(0x8001, 0xBC);
+    memory.WriteByte(0x8002, 0x9A);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.Y = 0x66;
+
+    const u32 start = cpu.cycles;
+    cpu.Execute(4);
+
+    EXPECT_EQ(memory.ReadByte(0x9ABC), 0x66);
+    EXPECT_EQ(cpu.Y, 0x66);
+    EXPECT_EQ(cpu.PC, 0x8003);
+    EXPECT_EQ(cpu.cycles, start + 4);
+}
+
+TEST(CPUTest, Execute_STYZeroPageX_Consumes4CyclesAndWraps) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x8000, 0x94);
+    memory.WriteByte(0x8001, 0x20);
+
+    CPU cpu(memory);
+    cpu.Reset();
+    cpu.Y = 0x77;
+    cpu.X = 0xF0;
+
+    const u32 start = cpu.cycles;
+    cpu.Execute(4);
+
+    EXPECT_EQ(memory.ReadByte(0x0010), 0x77);
+    EXPECT_EQ(cpu.Y, 0x77);
+    EXPECT_EQ(cpu.PC, 0x8002);
+    EXPECT_EQ(cpu.cycles, start + 4);
+}

@@ -82,6 +82,11 @@ Byte CPU::ReadByteAndTick(const Word addr) {
     return value;
 }
 
+void CPU::WriteByteAndTick(const Word addr, const Byte value) {
+    mem.WriteByte(addr, value);
+    cycles += 1;
+}
+
 Word CPU::AddrZeroPage() { return FetchByte(); }
 
 Word CPU::AddrAbsolute() { return FetchWord(); }
@@ -108,6 +113,13 @@ Word CPU::AddrAbsoluteX() {
     return addr;
 }
 
+Word CPU::AddrAbsoluteXStore() {
+    const Word base = FetchWord();
+    const Word addr = static_cast<Word>(base + X);
+    cycles += 1;
+    return addr;
+}
+
 Word CPU::AddrIndexedIndirectX() {
     const Byte zp = static_cast<Byte>(FetchByte() + X);
     cycles += 1;
@@ -124,6 +136,13 @@ Word CPU::AddrAbsoluteY() {
     return addr;
 }
 
+Word CPU::AddrAbsoluteYStore() {
+    const Word base = FetchWord();
+    const Word addr = static_cast<Word>(base + Y);
+    cycles += 1;
+    return addr;
+}
+
 Word CPU::AddrIndirectIndexedY() {
     const Byte zp = FetchByte();
     const Byte lo = ReadByteAndTick(zp);
@@ -132,6 +151,16 @@ Word CPU::AddrIndirectIndexedY() {
     const Word addr = static_cast<Word>(base + Y);
     if ((base & 0xFF00) != (addr & 0xFF00))
         cycles += 1;
+    return addr;
+}
+
+Word CPU::AddrIndirectIndexedYStore() {
+    const Byte zp = FetchByte();
+    const Byte lo = ReadByteAndTick(zp);
+    const Byte hi = ReadByteAndTick(static_cast<Byte>(zp + 1));
+    const Word base = MakeWord(lo, hi);
+    const Word addr = static_cast<Word>(base + Y);
+    cycles += 1;
     return addr;
 }
 
@@ -197,6 +226,45 @@ void CPU::Execute(const u32 exec_cycles) {
             break;
         case 0xBC: // LDY abs,X
             LDY(ReadByteAndTick(AddrAbsoluteX()));
+            break;
+        case 0x85: // STA zp
+            WriteByteAndTick(AddrZeroPage(), A);
+            break;
+        case 0x8D: // STA abs
+            WriteByteAndTick(AddrAbsolute(), A);
+            break;
+        case 0x95: // STA zp,X
+            WriteByteAndTick(AddrZeroPageX(), A);
+            break;
+        case 0x9D: // STA abs,X
+            WriteByteAndTick(AddrAbsoluteXStore(), A);
+            break;
+        case 0x99: // STA abs,Y
+            WriteByteAndTick(AddrAbsoluteYStore(), A);
+            break;
+        case 0x81: // STA (ind,X)
+            WriteByteAndTick(AddrIndexedIndirectX(), A);
+            break;
+        case 0x91: // STA (ind),Y
+            WriteByteAndTick(AddrIndirectIndexedYStore(), A);
+            break;
+        case 0x86: // STX zp
+            WriteByteAndTick(AddrZeroPage(), X);
+            break;
+        case 0x8E: // STX abs
+            WriteByteAndTick(AddrAbsolute(), X);
+            break;
+        case 0x96: // STX zp,Y
+            WriteByteAndTick(AddrZeroPageY(), X);
+            break;
+        case 0x84: // STY zp
+            WriteByteAndTick(AddrZeroPage(), Y);
+            break;
+        case 0x8C: // STY abs
+            WriteByteAndTick(AddrAbsolute(), Y);
+            break;
+        case 0x94: // STY zp,X
+            WriteByteAndTick(AddrZeroPageX(), Y);
             break;
         case 0xEA:       // NOP
             cycles += 1; // total 2 cycles
