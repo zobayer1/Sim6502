@@ -35,6 +35,42 @@ TEST(CPUTest, CPUResetLoadsVectorAndSetsSPAndCycles) {
     EXPECT_EQ(cpu.Y, 0x00);
 }
 
+TEST(CPUTest, Execute_NOP_Consumes2CyclesAndAdvancesPC) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x8000, 0xEA);
+
+    CPU cpu(memory);
+    cpu.Reset();
+
+    const u32 start_cycles = cpu.cycles;
+
+    cpu.Execute(2);
+
+    EXPECT_EQ(cpu.PC, 0x8001);
+    EXPECT_EQ(cpu.cycles, start_cycles + 2);
+}
+
+#ifdef NDEBUG
+TEST(CPUTest, Execute_UnknownOpcode_SkipsInReleaseBuild) {
+    Memory memory;
+    memory.WriteByte(0xFFFC, 0x00);
+    memory.WriteByte(0xFFFD, 0x80);
+    memory.WriteByte(0x8000, 0x02);
+
+    CPU cpu(memory);
+    cpu.Reset();
+
+    const u32 start_cycles = cpu.cycles;
+
+    cpu.Execute(1);
+
+    EXPECT_EQ(cpu.PC, 0x8001);
+    EXPECT_EQ(cpu.cycles, start_cycles + 1);
+}
+#endif
+
 TEST(CPUTest, Execute_LDAImmediate_ConsumesCyclesAndAdvancesPC) {
     Memory memory;
 

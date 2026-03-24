@@ -1,8 +1,6 @@
 #include "cpu6502/mem.hpp"
 
-#include <cstring>
-
-Memory::Memory() { std::memset(Data, 0, MAX_MEM); }
+Memory::Memory() = default;
 
 Byte Memory::ReadByte(const Word Address) const { return Data[Address]; }
 
@@ -10,13 +8,13 @@ void Memory::WriteByte(const Word Address, const Byte Value) { Data[Address] = V
 
 Word Memory::ReadWord(const Word Address) const {
     const Byte lo = ReadByte(Address);
-    const Byte hi = ReadByte(Address + 1);
-    return (hi << 8) | lo;
+    const Byte hi = ReadByte(static_cast<Word>(Address + 1));
+    return static_cast<Word>((static_cast<Word>(hi) << 8) | lo);
 }
 
 void Memory::WriteWord(const Word Address, const Word Value) {
-    const Byte lo = Value & 0xFF;
-    const Byte hi = (Value >> 8) & 0xFF;
+    const Byte lo = static_cast<Byte>(Value & 0x00FF);
+    const Byte hi = static_cast<Byte>((Value >> 8) & 0x00FF);
     WriteByte(Address, lo);
-    WriteByte(Address + 1, hi);
+    WriteByte(static_cast<Word>(Address + 1), hi);
 }

@@ -80,3 +80,16 @@ TEST(MemoryTest, WriteWordAtLastMinusOne_Safe) {
     EXPECT_EQ(mem.ReadByte(addr), static_cast<Byte>(value & 0xFF));
     EXPECT_EQ(mem.ReadByte(addr + 1), static_cast<Byte>((value >> 8) & 0xFF));
 }
+
+TEST(MemoryTest, WordAccessAtFFFFWrapsToZero) {
+    Memory mem;
+
+    constexpr Word addr = 0xFFFF;
+    constexpr Word value = 0xABCD;
+
+    mem.WriteWord(addr, value);
+
+    EXPECT_EQ(mem.ReadByte(addr), static_cast<Byte>(value & 0xFF));
+    EXPECT_EQ(mem.ReadByte(0x0000), static_cast<Byte>((value >> 8) & 0xFF));
+    EXPECT_EQ(mem.ReadWord(addr), value);
+}

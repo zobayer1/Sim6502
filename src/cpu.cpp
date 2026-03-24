@@ -1,4 +1,9 @@
 #include <cpu6502/cpu.hpp>
+#include <cstdlib>
+
+namespace {
+Word MakeWord(const Byte lo, const Byte hi) { return static_cast<Word>((static_cast<Word>(hi) << 8) | lo); }
+} // namespace
 
 CPU::CPU(Memory &memory) : mem(memory) {
     PC = 0x0000;
@@ -32,46 +37,46 @@ void CPU::Reset() {
     PS.V = 0;
     PS.N = 0;
     // Read the reset vector from 0xFFFC and 0xFFFD
-    Byte lo = mem.ReadByte(0xFFFC);
-    Byte hi = mem.ReadByte(0xFFFD);
-    PC = (hi << 8) | lo;
+    const Byte lo = mem.ReadByte(0xFFFC);
+    const Byte hi = mem.ReadByte(0xFFFD);
+    PC = MakeWord(lo, hi);
     // Reset takes 6 cycles on real 6502
     cycles = 6;
 }
 
 Byte CPU::FetchByte() {
-    Byte data = mem.ReadByte(PC);
+    const Byte data = mem.ReadByte(PC);
     PC++;
     cycles++;
     return data;
 }
 
 Word CPU::FetchWord() {
-    Word data = mem.ReadWord(PC);
+    const Word data = mem.ReadWord(PC);
     PC += 2;
     cycles += 2;
     return data;
 }
 
-void CPU::LDA(Byte operand) {
+void CPU::LDA(const Byte operand) {
     A = operand;
     PS.Z = (A == 0);
     PS.N = (A & 0x80) != 0;
 }
 
-void CPU::LDX(Byte operand) {
+void CPU::LDX(const Byte operand) {
     X = operand;
     PS.Z = (X == 0);
     PS.N = (X & 0x80) != 0;
 }
 
-void CPU::LDY(Byte operand) {
+void CPU::LDY(const Byte operand) {
     Y = operand;
     PS.Z = (Y == 0);
     PS.N = (Y & 0x80) != 0;
 }
 
-Byte CPU::ReadByteAndTick(Word addr) {
+Byte CPU::ReadByteAndTick(const Word addr) {
     const Byte value = mem.ReadByte(addr);
     cycles += 1;
     return value;
@@ -108,7 +113,7 @@ Word CPU::AddrIndexedIndirectX() {
     cycles += 1;
     const Byte lo = ReadByteAndTick(zp);
     const Byte hi = ReadByteAndTick(static_cast<Byte>(zp + 1));
-    return static_cast<Word>((static_cast<Word>(hi) << 8) | lo);
+    return MakeWord(lo, hi);
 }
 
 Word CPU::AddrAbsoluteY() {
@@ -123,17 +128,19 @@ Word CPU::AddrIndirectIndexedY() {
     const Byte zp = FetchByte();
     const Byte lo = ReadByteAndTick(zp);
     const Byte hi = ReadByteAndTick(static_cast<Byte>(zp + 1));
-    const Word base = static_cast<Word>((static_cast<Word>(hi) << 8) | lo);
+    const Word base = MakeWord(lo, hi);
     const Word addr = static_cast<Word>(base + Y);
     if ((base & 0xFF00) != (addr & 0xFF00))
         cycles += 1;
     return addr;
 }
 
-void CPU::Execute(u32 exec_cycles) {
+void CPU::Execute(const u32 exec_cycles) {
     const u32 target_cycles = cycles + exec_cycles;
     while (cycles < target_cycles) {
-        switch (FetchByte()) {
+        // ReSharper disable once CppTooWideScope
+        const Byte opcode = FetchByte();
+        switch (opcode) {
         case 0x00:       // BRK (stub)
             cycles += 6; // total 7 including opcode fetch
             break;
@@ -194,8 +201,12 @@ void CPU::Execute(u32 exec_cycles) {
         case 0xEA:       // NOP
             cycles += 1; // total 2 cycles
             break;
-        default: // Unknown treated as 1-cycle skip
+        default:
+#ifndef NDEBUG
+            std::abort();
+#else
             break;
+#endif
         }
     }
 }
