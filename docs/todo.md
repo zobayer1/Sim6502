@@ -2,8 +2,6 @@
 
 This document tracks the current instruction and addressing-mode backlog that was previously maintained in `README.md`.
 
-## Load / Store
-- [ ] STA / STX / STY (store registers to memory)
 
 ## Arithmetic / Logic
 - [ ] ADC / SBC – Add/Subtract with Carry (sets C, V, Z, N)
