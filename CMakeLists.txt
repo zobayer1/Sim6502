@@ -6,6 +6,27 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 add_library(cpu6502_compiler_flags INTERFACE)
 target_compile_features(cpu6502_compiler_flags INTERFACE cxx_std_17)
 
+option(CPU6502_ENABLE_WARNINGS "Enable compiler warnings for project targets" ON)
+
+function(cpu6502_enable_warnings target_name)
+    if(NOT CPU6502_ENABLE_WARNINGS)
+        return()
+    endif()
+
+    if(MSVC)
+        target_compile_options(${target_name} PRIVATE /W4 /permissive-)
+    else()
+        target_compile_options(${target_name} PRIVATE
+            -Wall
+            -Wextra
+            -Wpedantic
+            -Wconversion
+            -Wsign-conversion
+            -Wshadow
+        )
+    endif()
+endfunction()
+
 include(cmake/UpdateSubmodules.cmake)
 include(CTest)
 add_subdirectory(external)

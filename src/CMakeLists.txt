@@ -3,6 +3,7 @@ add_library(cpu6502 cpu.cpp
 
 # Compile features propagate to consumers
 target_compile_features(cpu6502 PUBLIC cxx_std_17)
+cpu6502_enable_warnings(cpu6502)
 
 # Generate a public config header for consumers
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/include/cpu6502/config.hpp @ONLY)
