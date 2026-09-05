@@ -112,11 +112,10 @@ int main() {
     };
 
     auto printOutputBuffer = [&]() {
-        std::cout << "  output:    [$2000..$2005] = "
-                  << "0x" << formatByte(memory.ReadByte(0x2000)) << ' ' << "0x" << formatByte(memory.ReadByte(0x2001))
-                  << ' ' << "0x" << formatByte(memory.ReadByte(0x2002)) << ' ' << "0x"
-                  << formatByte(memory.ReadByte(0x2003)) << ' ' << "0x" << formatByte(memory.ReadByte(0x2004)) << ' '
-                  << "0x" << formatByte(memory.ReadByte(0x2005)) << '\n';
+        std::cout << "  output:    [$2000..$2005] =";
+        for (Word addr = 0x2000; addr <= 0x2005; ++addr)
+            std::cout << " 0x" << formatByte(memory.ReadByte(addr));
+        std::cout << '\n';
     };
 
     printState("After reset:");
