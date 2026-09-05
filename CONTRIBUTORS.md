@@ -30,10 +30,10 @@ If you submit a PR that gets merged, please add yourself to the list below in th
   - `feat: add XYZ`, `fix: correct ABC`, `docs: update README`, `build:`, `test:`, etc.
 
 ### Return-Value Discarding (library API)
-- By default, some APIs are annotated `[[nodiscard]]` to catch mistakes.
-- If you intentionally want to discard return values:
-  - Per call: assign to a `[[maybe_unused]]` variable.
-  - Build-time: configure with `-DCPU6502_ALLOW_DISCARD_RETURNS=ON` to disable the warnings in your build.
+- `Memory::ReadByte` and `Memory::ReadWord` are annotated `[[nodiscard]]` to catch mistakes.
+- If you intentionally want to discard a return value, do it per call:
+  - Cast the call to `void`, or assign it to a `[[maybe_unused]]` variable.
+- There is no build-time switch to allow discarding; handle it at the call site as above.
 
 ### Pull Request Checklist
 - [ ] Code formatted (see `format` and `format-check` targets)
