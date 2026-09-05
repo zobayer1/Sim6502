@@ -46,6 +46,9 @@ coverage/
 Testing/
 install/
 
+# Python venv (e.g. for a pinned clang-format, see CONTRIBUTORS.md)
+.venv/
+
 # Logs and temp
 *.log
 *.tmp

@@ -74,6 +74,15 @@ export(
 # Formatting helpers (only include/, src/, tests/, examples/)
 find_program(CLANG_FORMAT_EXECUTABLE NAMES clang-format)
 if(CLANG_FORMAT_EXECUTABLE)
+    # Reported because formatting differs between clang-format versions; CI pins its own.
+    execute_process(
+        COMMAND ${CLANG_FORMAT_EXECUTABLE} --version
+        OUTPUT_VARIABLE CLANG_FORMAT_VERSION_STRING
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+    message(STATUS "Formatting with ${CLANG_FORMAT_VERSION_STRING} (${CLANG_FORMAT_EXECUTABLE})")
+
     file(GLOB_RECURSE CLANG_FORMAT_FILES CONFIGURE_DEPENDS
         ${CMAKE_SOURCE_DIR}/include/*.[hH]
         ${CMAKE_SOURCE_DIR}/include/*.[hH][pP][pP]

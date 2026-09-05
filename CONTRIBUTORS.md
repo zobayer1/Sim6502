@@ -48,6 +48,15 @@ If you submit a PR that gets merged, please add yourself to the list below in th
 - Tests via GoogleTest (`ctest`)
 - CMake 3.28+
 
+CI pins **clang-format 22.1.8** (see `CLANG_FORMAT_VERSION` in `.github/workflows/cmake-ubuntu.yml`), because
+formatting differs between clang-format versions. Configure prints the version it found; if yours differs and
+`format-check` disagrees with CI, point CMake at a matching one:
+
+```sh
+python3 -m venv .venv && .venv/bin/pip install clang-format==22.1.8
+cmake -S . -B build -DCLANG_FORMAT_EXECUTABLE="$PWD/.venv/bin/clang-format"
+```
+
 ### Legal
 - Project is MIT-licensed. Include third-party license notices as needed.
 - No CLA required. If your organization requires a DCO sign-off, you can use:

@@ -107,6 +107,9 @@ Optional: run clang-format manually if you prefer:
 ```sh
 clang-format -i include/cpu6502/*.hpp src/*.cpp tests/*.cpp examples/*.cpp
 ```
+CI pins clang-format 22.1.8; formatting differs between versions, so a different local version may disagree with CI.
+Configure prints the version it found, and `-DCLANG_FORMAT_EXECUTABLE=<path>` selects a specific one. See
+[CONTRIBUTORS.md](./CONTRIBUTORS.md#code-style--tooling) for details.
 
 Instruction Status
 ------------------

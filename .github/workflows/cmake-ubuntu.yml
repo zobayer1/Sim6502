@@ -9,6 +9,9 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
+  # Pinned: runner images ship an older clang-format that wraps some code differently.
+  # Keep this in sync with the version documented in CONTRIBUTORS.md.
+  CLANG_FORMAT_VERSION: 22.1.8
 
 jobs:
   build:
@@ -17,9 +20,19 @@ jobs:
     steps:
     - uses: actions/checkout@v7
 
+    - name: Install clang-format
+      # Installed into a venv so the pinned version wins over the one on the image.
+      run: |
+        python3 -m venv "${{runner.temp}}/clang-format"
+        "${{runner.temp}}/clang-format/bin/pip" install --quiet "clang-format==${{env.CLANG_FORMAT_VERSION}}"
+        "${{runner.temp}}/clang-format/bin/clang-format" --version
+
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory.
-      run: cmake -S . -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      run: >
+        cmake -S . -B ${{github.workspace}}/build
+        -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        -DCLANG_FORMAT_EXECUTABLE=${{runner.temp}}/clang-format/bin/clang-format
 
     - name: Build
       # Build your program with the given configuration

@@ -36,6 +36,14 @@ Skip the submodule update on configure with `-DGIT_SUBMODULE=OFF`. Warnings (`-W
 CI (`.github/workflows/cmake-ubuntu.yml`) builds **Release**, then runs `format-check`, then `ctest`. Note that
 `tests/cpu_test.cpp` has an `#ifdef NDEBUG`-gated case, so a Debug run and a Release run execute different test sets.
 
+CI pins **clang-format 22.1.8** (`CLANG_FORMAT_VERSION` in the workflow, pip-installed into a venv and passed via
+`-DCLANG_FORMAT_EXECUTABLE`), because formatting genuinely differs between clang-format versions — `ubuntu-latest`
+otherwise ships 18.1.3, which wraps some constructs differently and silently broke CI once. Configure prints the
+version it found; match it locally with `pip install clang-format==22.1.8` and
+`-DCLANG_FORMAT_EXECUTABLE=<venv>/bin/clang-format` if yours disagrees. Long `<<` chains mixing adjacent string
+literals (`"text " << "0x" << ...`) near the 120-column limit are the construct versions disagree on — prefer short
+statements or a loop.
+
 ## Architecture
 
 Two classes, no namespace, include guards, plain global types (`Byte`/`Word`/`u32` are `using` aliases in `mem.hpp`).
